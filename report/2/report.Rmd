@@ -1,0 +1,78 @@
+---
+title: "テキスト前処理<br> + 形態素解析"
+author: "岸山 健"
+date: '`r format(Sys.time(), "%Y/%m/%d %H:%M")`'
+output:
+  ioslides_presentation:
+      transition: faster
+---
+
+<!-- 
+library ('rmarkdown'); render('report.Rmd')
+fig.align: center
+-->
+
+```{r setup, include=FALSE}
+# セットアップチャンク
+# パッケージのロード，データ読み込みなど，Rオプション設定など
+# options(width = 1000)
+# dat = read.table("hoge")
+# 全てのコードチャンクに適用されるオプション
+# knitr::opts_chunk$set(warning=FALSE)
+# knitr::opts_chunk$set(message=FALSE)
+# knitr::opts_chunk$set(echo=FALSE)
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE,
+    fig.align='center',
+    fig.pos='H',
+    dev = c("png", "svg"),
+    dpi=500
+)
+```
+
+## テキスト前処理 + 形態素解析
+
+1. 共通接頭辞検索(徳永 2012, p.75)
+    * データ構造:トライ木
+    * 実装:テーブル
+
+## 実装(テーブル)
+
+```{r}
+d <- read.table("dict.csv",sep='\t', header=TRUE)
+d[is.na(d)] <- -1
+```
+
+## 実装(トライ木の探索)
+
+```{r}
+d[["た"]]
+d
+# 先頭から一字ずつ移動する
+# トライのステート(ノード)
+
+serch <- function(key, dictionary,state=0){
+    key.length = nchar(key)
+    for (i in 1:key.length){
+        k = substring(key, i,i)
+        next_s = as.numeric(subset(dictionary, dictionary$id==state)[k])
+        if (next_s == -1){
+            return("辞書には含まれません")
+        }else{
+            print(k)
+            state=as.numeric(next_s)
+        }
+    }
+    return(state)
+}
+
+# 最終的にたどり着くパスが記録される。
+# たべた
+key="たべものが体質にあった"
+serch(key, d)
+key="たべたものが体質にあった"
+key="たべるものが体質にあった"
+serch(key, d)
+```
