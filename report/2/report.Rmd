@@ -55,7 +55,7 @@ datatable(d,options = list(pageLength=9))
 * d.tableは辞書のテーブル
 
 ```{r}
-serch <- function(key, d.table){
+search <- function(key, d.table){
     state <- 0
     # 通ったパスをstatsに保存
     states=c(state)
@@ -75,7 +75,6 @@ serch <- function(key, d.table){
     }
     return(states)
 }
-
 ```
 
 ## 実装(トライ木の探索) {.smaller}
@@ -86,15 +85,15 @@ serch <- function(key, d.table){
 ```{r}
 # たべた
 key="たべものが体質にあった"
-serch(key, d)
+search(key, d)
 key="たべたものが体質にあった"
-serch(key, d)
+search(key, d)
 key="たべるものが体質にあった"
-serch(key, d)
+search(key, d)
 key="たべたものが体質にあった"
-serch(key, d)
+search(key, d)
 key="べたもたものが体質にあった"
-serch(key, d)
+search(key, d)
 ```
 
 ## あとはここまでくれば
