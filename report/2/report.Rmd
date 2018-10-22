@@ -22,7 +22,7 @@ fig.align: center
 # knitr::opts_chunk$set(message=FALSE)
 # knitr::opts_chunk$set(echo=FALSE)
 knitr::opts_chunk$set(
-    echo = FALSE,
+    # echo = FALSE,
     message = FALSE,
     warning = FALSE,
     fig.align='center',
@@ -30,6 +30,7 @@ knitr::opts_chunk$set(
     dev = c("png", "svg"),
     dpi=500
 )
+library(DT)
 ```
 
 ## テキスト前処理 + 形態素解析
@@ -38,41 +39,62 @@ knitr::opts_chunk$set(
     * データ構造:トライ木
     * 実装:テーブル
 
-## 実装(テーブル)
+## 実装(テーブル) {.smaller}
 
 ```{r}
 d <- read.table("dict.csv",sep='\t', header=TRUE)
 d[is.na(d)] <- -1
 ```
 
-## 実装(トライ木の探索)
+```{r,echo=FALSE}
+datatable(d,options = list(pageLength=9))
+```
+
+## 実装(トライ木の探索) {.smaller}
+
+* d.tableは辞書のテーブル
 
 ```{r}
-d[["た"]]
-d
-# 先頭から一字ずつ移動する
-# トライのステート(ノード)
-
-serch <- function(key, dictionary,state=0){
-    key.length = nchar(key)
-    for (i in 1:key.length){
-        k = substring(key, i,i)
-        next_s = as.numeric(subset(dictionary, dictionary$id==state)[k])
+serch <- function(key, d.table){
+    state <- 0
+    # 通ったパスをstatsに保存
+    states=c(state)
+    key.len <- nchar(key)
+    for (i in 1:key.len){
+        k_i <- substring(key, i, i)
+        if( !(k_i %in% colnames(d.table)) ){
+            return(states)
+        }
+        next_s <- as.numeric(subset(d.table, d.table$pid==state)[k_i])
         if (next_s == -1){
-            return("辞書には含まれません")
+            break
         }else{
-            print(k)
             state=as.numeric(next_s)
+            states=c(states,state)
         }
     }
-    return(state)
+    return(states)
 }
 
-# 最終的にたどり着くパスが記録される。
+```
+
+## 実装(トライ木の探索) {.smaller}
+
+* d.tableは辞書のテーブル
+* 全て得なくてはならない
+
+```{r}
 # たべた
 key="たべものが体質にあった"
 serch(key, d)
 key="たべたものが体質にあった"
+serch(key, d)
 key="たべるものが体質にあった"
 serch(key, d)
+key="たべたものが体質にあった"
+serch(key, d)
+key="べたもたものが体質にあった"
+serch(key, d)
 ```
+
+## あとはここまでくれば
