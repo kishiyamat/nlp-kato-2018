@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>テキスト前処理  + 形態素解析</title>
+  <title>テキスト前処理  + 形態素解析 in R</title>
 
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -20,7 +20,7 @@
     var SLIDE_CONFIG = {
       // Slide settings
       settings: {
-                title: 'テキスト前処理<br> + 形態素解析',
+                title: 'テキスト前処理<br> + 形態素解析 in R',
                         useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
@@ -5300,7 +5300,7 @@ padding-right: inherit;
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">2018/10/25 11:33</p>
+            <p style="margin-top: 6px; margin-left: -2px;">2018/10/25 13:05</p>
           </hgroup>
   </slide>
 
@@ -5311,7 +5311,7 @@ fig.align: center
 
 <slide class=""><hgroup><h2>テキスト前処理 + 形態素解析</h2></hgroup><article  id="-">
 
-<p>形態素解析は大きく分けて2つのステップがあります。 与えられた文字列に対して在り得るトークン(単語)を得る作業と、 その得たトークンの組み合わせを考える作業です。</p>
+<p>形態素解析には大きく分けて2つのステップがあります。 与えられた文字列に対して在り得るトークン(単語)を得る作業と、 その得たトークンの組み合わせを考える作業です。</p>
 
 <ol>
 <li>共通接頭辞検索(徳永 2012, p.75)
@@ -5322,13 +5322,13 @@ fig.align: center
 </ul></li>
 </ol>
 
-</article></slide><slide class=""><hgroup><h2>Trie木のテーブル</h2></hgroup><article  id="trie" class="smaller">
+</article></slide><slide class=""><hgroup><h2>Trie木のテーブル</h2></hgroup><article  class="smaller" id="trie">
 
 <pre class = 'prettyprint lang-r'>trie &lt;- read.table(&quot;trie.tsv&quot;,sep=&#39;\t&#39;, header=TRUE)
 trie[is.na(trie)] &lt;- -1</pre>
 
-<div id="htmlwidget-7b259dc6219d54ad6650" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7b259dc6219d54ad6650">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],[1,-1,-1,-1,-1,-1,-1,12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[3,-1,-1,-1,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[4,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[6,-1,-1,-1,-1,-1,-1,-1,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,9,-1,-1,-1,-1,-1,-1,-1,15,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1,16,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,19,-1,-1,-1,13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,17,-1,-1,-1,-1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>pid<\/th>\n      <th>質<\/th>\n      <th>た<\/th>\n      <th>あ<\/th>\n      <th>に<\/th>\n      <th>が<\/th>\n      <th>も<\/th>\n      <th>体<\/th>\n      <th>べ<\/th>\n      <th>う<\/th>\n      <th>っ<\/th>\n      <th>る<\/th>\n      <th>の<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":9,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10,11,12,13]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[9,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-72c4abb3aee303fb610a" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-72c4abb3aee303fb610a">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],[1,-1,-1,-1,-1,-1,-1,12,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[3,-1,-1,-1,11,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[4,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[6,-1,-1,-1,-1,-1,-1,-1,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,9,-1,-1,-1,-1,-1,-1,-1,15,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1,16,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,19,-1,-1,-1,13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,17,-1,-1,-1,-1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>pid<\/th>\n      <th>質<\/th>\n      <th>た<\/th>\n      <th>あ<\/th>\n      <th>に<\/th>\n      <th>が<\/th>\n      <th>も<\/th>\n      <th>体<\/th>\n      <th>べ<\/th>\n      <th>う<\/th>\n      <th>っ<\/th>\n      <th>る<\/th>\n      <th>の<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":9,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10,11,12,13]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[9,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 
 </article></slide><slide class=""><hgroup><h2>トライ木の探索</h2></hgroup><article  class="smaller">
 
@@ -5370,68 +5370,96 @@ search4pids(key, trie)</pre>
 
 <pre >## [1]  0  2  8 14 17</pre>
 
-</article></slide><slide class=""><hgroup><h2>Trie木のテーブル</h2></hgroup><article  id="trie-1" class="smaller">
+</article></slide><slide class=""><hgroup><h2>Trie木のテーブル</h2></hgroup><article  class="smaller" id="trie-1">
 
-<pre class = 'prettyprint lang-r'>pid2lex &lt;- read.table(&quot;pid2lex.tsv&quot;,sep=&#39;\t&#39;, header=TRUE)
+<p>文字列を自動的に要因として扱う。unlistすると要因だから数値に変換される。</p>
+
+<pre class = 'prettyprint lang-r'>pid2lex &lt;- read.table(&quot;pid2lex.tsv&quot;,sep=&#39;\t&#39;, header=TRUE,
+                      stringsAsFactors=FALSE)
 datatable(pid2lex,options = list(pageLength=9))</pre>
 
-<div id="htmlwidget-a5e16da85d4a6c5cbe5e" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-a5e16da85d4a6c5cbe5e">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],["","質","た","","に","が","も","体","たべ","あう","あっ","","体質","たべる","","にあう","にあっ","たべもの","もの","にる"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>pid<\/th>\n      <th>lex<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":9,"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[9,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-6e55e8966ce1e15f77e8" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6e55e8966ce1e15f77e8">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],[1,2,4,5,6,7,8,9,10,12,13,15,16,17,18,19],["質","た","に","が","も","体","たべ","あう","あっ","体質","たべる","にあう","にあっ","たべもの","もの","にる"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>pid<\/th>\n      <th>lex<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":9,"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[9,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 
 <pre class = 'prettyprint lang-r'># lexを返す関数を
 # まず.dfをとって
 # さらにに.pidをとって返す
 lex.by.pid &lt;- function(.df) function(.pid) {
-    .df %&gt;% filter(pid==.pid) %&gt;% return() 
+    if ( !(.pid %in% .df$pid)){
+        return(&quot;&quot;)
+    }else{
+        .df %&gt;% filter(pid==.pid) %&gt;% 
+        # selectではない
+        pull(lex) %&gt;% 
+        return() 
+    }
 }
+#flatten %&gt;%as.character() %&gt;% 
 
 key=&quot;たべものが体質にあった&quot;
-search4pids(key, trie) %&gt;% map(., lex.by.pid(pid2lex))</pre>
+search4pids(key, trie) %&gt;% map(., lex.by.pid(pid2lex)) %&gt;% unlist</pre>
 
-<pre >## [[1]]
-##   pid lex
-## 1   0    
-## 
-## [[2]]
-##   pid lex
-## 1   2  た
-## 
-## [[3]]
-##   pid  lex
-## 1   8 たべ
-## 
-## [[4]]
-##   pid lex
-## 1  14    
-## 
-## [[5]]
-##   pid      lex
-## 1  17 たべもの</pre>
+<pre >## [1] &quot;&quot;         &quot;た&quot;       &quot;たべ&quot;     &quot;&quot;         &quot;たべもの&quot;</pre>
 
 </article></slide><slide class=""><hgroup><h2>辞書の参照</h2></hgroup><article >
+
+<pre class = 'prettyprint lang-r'>dictionary &lt;- read.table(&quot;dictionary.tsv&quot;,sep=&#39;\t&#39;, header=TRUE,
+                      stringsAsFactors=FALSE)
+datatable(dictionary,options = list(pageLength=9))</pre>
+
+<div id="htmlwidget-7fd4fc147bb7f18143b8" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7fd4fc147bb7f18143b8">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18"],["体","質","体質","たべもの","もの","たべる","あう","にあう","にる","たべ","あっ","にあっ","に","が","が","に","も","た"],["名詞","名詞","名詞","名詞","名詞","動詞","動詞","動詞","動詞","動詞","動詞","動詞","動詞","助詞","助詞","助詞","助詞","助動詞"],["一般","一般","一般","一般","一般","自立","自立","自立","自立","自立","自立","自立","自立","格助詞","接続助詞","格助詞","係助詞",""],["","","","","","終止形","終止形","終止形","終止形","連用形","連用形","連用形","連用形","","","","","終止形"],["体","質","体質","たべもの","もの","食べる","あう","似合う","似る","食べる","あう","似合う","似る","が","が","に","も","た"],["からだ","しつ","たいしつ","たべもの","もの","たべる","あう","にあう","にる","たべ","あっ","にあっ","に","が","が","に","も","た"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>見出し<\/th>\n      <th>品詞<\/th>\n      <th>品詞細分類<\/th>\n      <th>活用形<\/th>\n      <th>基本形<\/th>\n      <th>読み<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":9,"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}],"lengthMenu":[9,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+
+<pre class = 'prettyprint lang-r'>dict.by.lex &lt;- function(.df) function(.lex) {
+    .df %&gt;% filter(`見出し`==.lex) %&gt;% return() 
+}
+
+search4pids(key, trie) %&gt;% 
+    map(., lex.by.pid(pid2lex)) %&gt;%
+    map(.,dict.by.lex(dictionary))</pre>
+
+<pre >## [[1]]
+## [1] 見出し     品詞       品詞細分類 活用形     基本形     読み      
+## &lt;0 rows&gt; (or 0-length row.names)
+## 
+## [[2]]
+##   見出し   品詞 品詞細分類 活用形 基本形 読み
+## 1     た 助動詞            終止形     た   た
+## 
+## [[3]]
+##   見出し 品詞 品詞細分類 活用形 基本形 読み
+## 1   たべ 動詞       自立 連用形 食べる たべ
+## 
+## [[4]]
+## [1] 見出し     品詞       品詞細分類 活用形     基本形     読み      
+## &lt;0 rows&gt; (or 0-length row.names)
+## 
+## [[5]]
+##     見出し 品詞 品詞細分類 活用形   基本形     読み
+## 1 たべもの 名詞       一般        たべもの たべもの</pre>
+
+<pre class = 'prettyprint lang-r'>dictionary %&gt;% filter(見出し==&quot;体&quot;)</pre>
+
+<pre >##   見出し 品詞 品詞細分類 活用形 基本形   読み
+## 1     体 名詞       一般            体 からだ</pre>
 
 <pre class = 'prettyprint lang-r'>search4pids(key, trie) %&gt;% 
     map(., lex.by.pid(pid2lex))</pre>
 
 <pre >## [[1]]
-##   pid lex
-## 1   0    
+## [1] &quot;&quot;
 ## 
 ## [[2]]
-##   pid lex
-## 1   2  た
+## [1] &quot;た&quot;
 ## 
 ## [[3]]
-##   pid  lex
-## 1   8 たべ
+## [1] &quot;たべ&quot;
 ## 
 ## [[4]]
-##   pid lex
-## 1  14    
+## [1] &quot;&quot;
 ## 
 ## [[5]]
-##   pid      lex
-## 1  17 たべもの</pre>
+## [1] &quot;たべもの&quot;</pre>
 
 </article></slide><slide class=""><hgroup><h2>Rのクラス(S4)</h2></hgroup><article  id="rs4">
 
@@ -5450,8 +5478,7 @@ search4pids(key, trie) %&gt;% map(., lex.by.pid(pid2lex))</pre>
     representation(
         start_pos = &quot;numeric&quot;,
         word = &quot;character&quot;,
-        score = &quot;numeric&quot;,
-        prev = &quot;Node&quot;
+        score = &quot;numeric&quot;
     ),
     prototype(
         score = 0
@@ -5460,12 +5487,28 @@ search4pids(key, trie) %&gt;% map(., lex.by.pid(pid2lex))</pre>
     #contains = &quot;numeric&quot;
 )
 
+#&quot;Nodes&quot; %&gt;% 
+#    setClass(
+#    # 名前付きスロット
+#    representation(
+#        start_pos = &quot;numeric&quot;,
+#        word = &quot;character&quot;,
+#        score = &quot;numeric&quot;,
+#        prev = &quot;Node&quot;
+#    ),
+#    prototype(
+#        score = 0
+#    )
+#    # 無名スロット(できれば使わない。クラスを明示的に)
+#    #contains = &quot;numeric&quot;
+#)
+
 node &lt;- new(&quot;Node&quot;, start_pos=0, word=&quot;BOS&quot;)
 node@word</pre>
 
 <pre >## [1] &quot;BOS&quot;</pre>
 
-<pre class = 'prettyprint lang-r'>node2 &lt;- new(&quot;Node&quot;, start_pos=0, word=&quot;BOS&quot;,prev=node)
+<pre class = 'prettyprint lang-r'>node2 &lt;- new(&quot;Nodes&quot;, start_pos=0, word=&quot;BOS&quot;,prev=node)
 node2@prev</pre>
 
 <pre >## An object of class &quot;Node&quot;
@@ -5476,32 +5519,7 @@ node2@prev</pre>
 ## [1] &quot;BOS&quot;
 ## 
 ## Slot &quot;score&quot;:
-## [1] 0
-## 
-## Slot &quot;prev&quot;:
-## An object of class &quot;Node&quot;
-## Slot &quot;start_pos&quot;:
-## numeric(0)
-## 
-## Slot &quot;word&quot;:
-## character(0)
-## 
-## Slot &quot;score&quot;:
-## [1] 0
-## 
-## Slot &quot;prev&quot;:
-## An object of class &quot;Node&quot;
-## Slot &quot;start_pos&quot;:
-## numeric(0)
-## 
-## Slot &quot;word&quot;:
-## character(0)
-## 
-## Slot &quot;score&quot;:
-## [1] 0
-## 
-## Slot &quot;prev&quot;:
-## NULL</pre></article></slide>
+## [1] 0</pre></article></slide>
 
 
   <slide class="backdrop"></slide>

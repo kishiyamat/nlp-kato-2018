@@ -1,5 +1,5 @@
 ---
-title: "テキスト前処理<br> + 形態素解析"
+title: "テキスト前処理<br> + 形態素解析 in R"
 author: "岸山 健"
 date: '`r format(Sys.time(), "%Y/%m/%d %H:%M")`'
 output:
@@ -38,7 +38,7 @@ library(purrr)
 
 ## テキスト前処理 + 形態素解析
 
-形態素解析は大きく分けて2つのステップがあります。
+形態素解析には大きく分けて2つのステップがあります。
 与えられた文字列に対して在り得るトークン(単語)を得る作業と、
 その得たトークンの組み合わせを考える作業です。
 
@@ -112,15 +112,15 @@ lex.by.pid <- function(.df) function(.pid) {
         return("")
     }else{
         .df %>% filter(pid==.pid) %>% 
+        # selectではない
         pull(lex) %>% 
         return() 
     }
 }
-    #flatten %>%as.character() %>% 
+#flatten %>%as.character() %>% 
 
 key="たべものが体質にあった"
 search4pids(key, trie) %>% map(., lex.by.pid(pid2lex)) %>% unlist
-%>% as.character
 ```
 
 ## 辞書の参照
@@ -134,22 +134,48 @@ dict.by.lex <- function(.df) function(.lex) {
     .df %>% filter(`見出し`==.lex) %>% return() 
 }
 
-
-x = search4pids(key, trie) %>% 
-    map(., lex.by.pid(pid2lex)) %>% flatten
-    %>%
-    map(.$lex, dict.by.lex(dictionary)) 
-
 search4pids(key, trie) %>% 
+    # 0を除去する無名関数
+    (function(l) return(l[l!=0])) %>%
     map(., lex.by.pid(pid2lex)) %>%
+    # 空の入力を除去する無名関数""
+    (function(l) return(l[l!=""])) %>%
     map(.,dict.by.lex(dictionary))
-
-dictionary %>% filter(見出し=="体")
-
-search4pids(key, trie) %>% 
-    map(., lex.by.pid(pid2lex))
 ```
-## Rのクラス(S4)
+
+## ちょっと関数化しておく
+
+```{r}
+common_prefix_serch <- 
+    function(.key, .trie, .pid2lex, .dictionary) {
+        search4pids(.key, .trie) %>% 
+        (function(l) return(l[l!=0])) %>%
+        map(., lex.by.pid(.pid2lex)) %>%
+        (function(l) return(l[l!=""])) %>%
+        map(., dict.by.lex(.dictionary))}
+common_prefix_serch(key, trie, pid2lex, dictionary)
+
+```
+
+## 先頭から辞書引き
+
+```{r}
+# 頭からの辞書引き
+lookup <- function(.str){
+    key.len <- nchar(key)
+    for (i in 1:key.len){
+        k_i <- substring(key, i, key.len)
+        words <- common_prefix_serch(k_i, trie, pid2lex, dictionary)
+        print(i)
+        for (word in words){
+            print(word)
+        }
+    }
+}
+lookup(key)
+```
+
+## グラフ構築
 
 * googleの方法
 * 無名はスロットは使わない
@@ -159,29 +185,69 @@ search4pids(key, trie) %>%
 与え方: new関数でインスタンスを作る
 取り出し方: `@`でメンバ変数にアクセスできる。
 
-```{r}
-library(magrittr)
+始まり位置、文字列、コストを持つ
 
-"Node" %>% 
-    setClass(
-    # 名前付きスロット
+前があるとも後ろがあるとも限らないので、
+とりあえず単ノードを作る。
+
+```{r}
+setClass(
+    "Node",
     representation(
         start_pos = "numeric",
+        end_pos = "numeric",
+        word = "character",
+        score = "numeric"
+    ),
+    prototype(
+        score = 0
+    )
+)
+```
+
+## Rのクラス(S4)
+
+ノードが一つ増えればそれはグラフになるので、
+グラフを作る。再帰定義できないのが悔しかっただけ。
+
+```{r}
+# デフォルトでprevにBOSを持つ
+setClass(
+    "Graph",
+    representation(
+        start_pos = "numeric",
+        end_pos = "numeric",
         word = "character",
         score = "numeric",
         prev = "Node"
     ),
     prototype(
-        score = 0
+        score=0,
+        prev =new("Node", start_pos=0, end_pos=1, word="BOS", score=0)
     )
-    # 無名スロット(できれば使わない。クラスを明示的に)
-    #contains = "numeric"
 )
-
-node <- new("Node", start_pos=0, word="BOS")
-node@word
-node2 <- new("Node", start_pos=0, word="BOS",prev=node)
-node2@prev
-
 ```
 
+```{r}
+key.len <- nchar(key)
+graph <- list(c(new("Node",start_pos=0,end_pos=1, word="BOS" ,score=0)))
+graph[[key.len]] <- list(
+    new("Node",start_pos=key.len,end_pos=key.len,word="EOS" ,score=0)
+)
+graph
+
+graph[[key.len]] = c(graph[[key.len]],graph[[key.len]])
+
+for (i in 1:key.len){
+    k_i <- substring(key, i, key.len)
+    words <- common_prefix_serch(k_i, trie, pid2lex, dictionary)
+    print(i)
+    for (word in words){
+        node <-
+            new("Graph", start_pos=i, end_pos=i+nchar(word),word=word)
+        if 
+    }
+}
+
+lookup(key)
+```
