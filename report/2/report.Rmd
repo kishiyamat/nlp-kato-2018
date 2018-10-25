@@ -31,46 +31,53 @@ knitr::opts_chunk$set(
     dpi=500
 )
 library(DT)
+library(dplyr)
+library(magrittr)
+library(purrr)
 ```
 
 ## テキスト前処理 + 形態素解析
+
+形態素解析は大きく分けて2つのステップがあります。
+与えられた文字列に対して在り得るトークン(単語)を得る作業と、
+その得たトークンの組み合わせを考える作業です。
 
 1. 共通接頭辞検索(徳永 2012, p.75)
     * データ構造:トライ木
     * 実装:テーブル
 
-## 実装(テーブル) {.smaller}
+## Trie木のテーブル {.smaller}
 
 ```{r}
-d <- read.table("dict.csv",sep='\t', header=TRUE)
-d[is.na(d)] <- -1
+trie <- read.table("trie.tsv",sep='\t', header=TRUE)
+trie[is.na(trie)] <- -1
 ```
 
 ```{r,echo=FALSE}
-datatable(d,options = list(pageLength=9))
+datatable(trie,options = list(pageLength=9))
 ```
 
-## 実装(トライ木の探索) {.smaller}
+## トライ木の探索 {.smaller}
 
-* d.tableは辞書のテーブル
+* 与えられた単語の頭から調べて、たどったノードのidを返す。
 
 ```{r}
-search <- function(key, d.table){
+search4pids <- function(key, trie){
     state <- 0
     # 通ったパスをstatsに保存
     states=c(state)
     key.len <- nchar(key)
     for (i in 1:key.len){
         k_i <- substring(key, i, i)
-        if( !(k_i %in% colnames(d.table)) ){
+        if( !(k_i %in% colnames(trie)) ){
             return(states)
         }
-        next_s <- as.numeric(subset(d.table, d.table$pid==state)[k_i])
+        next_s <- as.numeric(subset(trie, trie$pid==state)[k_i])
         if (next_s == -1){
             break
         }else{
             state=as.numeric(next_s)
-            states=c(states,state)
+            states=c(states, state)
         }
     }
     return(states)
@@ -79,21 +86,102 @@ search <- function(key, d.table){
 
 ## 実装(トライ木の探索) {.smaller}
 
-* d.tableは辞書のテーブル
+* trieは辞書のテーブル
 * 全て得なくてはならない
 
 ```{r}
 # たべた
 key="たべものが体質にあった"
-search(key, d)
-key="たべたものが体質にあった"
-search(key, d)
-key="たべるものが体質にあった"
-search(key, d)
-key="たべたものが体質にあった"
-search(key, d)
-key="べたもたものが体質にあった"
-search(key, d)
+search4pids(key, trie)
 ```
 
-## あとはここまでくれば
+## Trie木のテーブル {.smaller}
+
+文字列を自動的に要因として扱う。unlistすると要因だから数値に変換される。
+
+```{r}
+pid2lex <- read.table("pid2lex.tsv",sep='\t', header=TRUE,
+                      stringsAsFactors=FALSE)
+datatable(pid2lex,options = list(pageLength=9))
+
+# lexを返す関数を
+# まず.dfをとって
+# さらにに.pidをとって返す
+lex.by.pid <- function(.df) function(.pid) {
+    if ( !(.pid %in% .df$pid)){
+        return("")
+    }else{
+        .df %>% filter(pid==.pid) %>% 
+        pull(lex) %>% 
+        return() 
+    }
+}
+    #flatten %>%as.character() %>% 
+
+key="たべものが体質にあった"
+search4pids(key, trie) %>% map(., lex.by.pid(pid2lex)) %>% unlist
+%>% as.character
+```
+
+## 辞書の参照
+
+```{r}
+dictionary <- read.table("dictionary.tsv",sep='\t', header=TRUE,
+                      stringsAsFactors=FALSE)
+datatable(dictionary,options = list(pageLength=9))
+
+dict.by.lex <- function(.df) function(.lex) {
+    .df %>% filter(`見出し`==.lex) %>% return() 
+}
+
+
+x = search4pids(key, trie) %>% 
+    map(., lex.by.pid(pid2lex)) %>% flatten
+    %>%
+    map(.$lex, dict.by.lex(dictionary)) 
+
+search4pids(key, trie) %>% 
+    map(., lex.by.pid(pid2lex)) %>%
+    map(.,dict.by.lex(dictionary))
+
+dictionary %>% filter(見出し=="体")
+
+search4pids(key, trie) %>% 
+    map(., lex.by.pid(pid2lex))
+```
+## Rのクラス(S4)
+
+* googleの方法
+* 無名はスロットは使わない
+
+スロット: representation
+スロットのデフォルト: prototype関数
+与え方: new関数でインスタンスを作る
+取り出し方: `@`でメンバ変数にアクセスできる。
+
+```{r}
+library(magrittr)
+
+"Node" %>% 
+    setClass(
+    # 名前付きスロット
+    representation(
+        start_pos = "numeric",
+        word = "character",
+        score = "numeric",
+        prev = "Node"
+    ),
+    prototype(
+        score = 0
+    )
+    # 無名スロット(できれば使わない。クラスを明示的に)
+    #contains = "numeric"
+)
+
+node <- new("Node", start_pos=0, word="BOS")
+node@word
+node2 <- new("Node", start_pos=0, word="BOS",prev=node)
+node2@prev
+
+```
+
