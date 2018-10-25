@@ -189,65 +189,54 @@ lookup(key)
 
 前があるとも後ろがあるとも限らないので、
 とりあえず単ノードを作る。
+prevもafterもいらない。idで見れば分かるのだから。
 
 ```{r}
+# デフォルトでprevにBOSを持つ
 setClass(
     "Node",
     representation(
         start_pos = "numeric",
         end_pos = "numeric",
-        word = "character",
+        lex = "data.frame",
+        pos = "character",
         score = "numeric"
     ),
     prototype(
-        score = 0
-    )
-)
-```
-
-## Rのクラス(S4)
-
-ノードが一つ増えればそれはグラフになるので、
-グラフを作る。再帰定義できないのが悔しかっただけ。
-
-```{r}
-# デフォルトでprevにBOSを持つ
-setClass(
-    "Graph",
-    representation(
-        start_pos = "numeric",
-        end_pos = "numeric",
-        word = "character",
-        score = "numeric",
-        prev = "Node"
-    ),
-    prototype(
-        score=0,
-        prev =new("Node", start_pos=0, end_pos=1, word="BOS", score=0)
+        score=0
     )
 )
 ```
 
 ```{r}
+# BOSを単語登録する
 key.len <- nchar(key)
-graph <- list(c(new("Node",start_pos=0,end_pos=1, word="BOS" ,score=0)))
-graph[[key.len]] <- list(
-    new("Node",start_pos=key.len,end_pos=key.len,word="EOS" ,score=0)
+graph <- list(c(new("Node",start_pos=0,end_pos=1, lex="BOS" ,score=0)))
+graph[[key.len+2]] <- list(
+    new("Node",start_pos=key.len+2,end_pos=key.len+3,lex="EOS",score=0)
 )
 graph
 
-graph[[key.len]] = c(graph[[key.len]],graph[[key.len]])
+# graph[[key.len]] = c(graph[[key.len]],graph[[key.len]])
 
 for (i in 1:key.len){
     k_i <- substring(key, i, key.len)
     words <- common_prefix_serch(k_i, trie, pid2lex, dictionary)
-    print(i)
     for (word in words){
-        node <-
-            new("Graph", start_pos=i, end_pos=i+nchar(word),word=word)
-        if 
+        for (i in 1:nrow(word)){
+            print(word[i,])
+            word.i <- word[i,]
+            start=i+1
+            end = i+1+nchar(word.i$見出し)
+            entry = word.i$見出し
+            node <-
+                new("Node", start_pos=start, end_pos=end, lex=word.i)
+            graph[[start]] <- c(graph[[start]],node) 
+        }
     }
 }
 
+graph
+key
 lookup(key)
 ```
