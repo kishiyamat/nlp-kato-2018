@@ -1,0 +1,242 @@
+---
+title: "テキスト前処理<br> + 形態素解析 in R"
+author: "岸山 健"
+date: '`r format(Sys.time(), "%Y/%m/%d %H:%M")`'
+output:
+  ioslides_presentation:
+      transition: faster
+---
+
+<!-- 
+library ('rmarkdown'); render('report.Rmd')
+fig.align: center
+-->
+
+```{r setup, include=FALSE}
+# セットアップチャンク
+# パッケージのロード，データ読み込みなど，Rオプション設定など
+# options(width = 1000)
+# dat = read.table("hoge")
+# 全てのコードチャンクに適用されるオプション
+# knitr::opts_chunk$set(warning=FALSE)
+# knitr::opts_chunk$set(message=FALSE)
+# knitr::opts_chunk$set(echo=FALSE)
+knitr::opts_chunk$set(
+    # echo = FALSE,
+    message = FALSE,
+    warning = FALSE,
+    fig.align='center',
+    fig.pos='H',
+    dev = c("png", "svg"),
+    dpi=500
+)
+library(DT)
+library(dplyr)
+library(magrittr)
+library(purrr)
+```
+
+## テキスト前処理 + 形態素解析
+
+形態素解析には大きく分けて2つのステップがあります。
+与えられた文字列に対して在り得るトークン(単語)を得る作業と、
+その得たトークンの組み合わせを考える作業です。
+
+1. 共通接頭辞検索(徳永 2012, p.75)
+    * データ構造:トライ木
+    * 実装:テーブル
+
+## Trie木のテーブル {.smaller}
+
+```{r}
+trie <- read.table("trie.tsv",sep='\t', header=TRUE)
+trie[is.na(trie)] <- -1
+```
+
+```{r,echo=FALSE}
+datatable(trie,options = list(pageLength=9))
+```
+
+## トライ木の探索 {.smaller}
+
+* 与えられた単語の頭から調べて、たどったノードのidを返す。
+
+```{r}
+search4pids <- function(key, trie){
+    state <- 0
+    # 通ったパスをstatsに保存
+    states=c(state)
+    key.len <- nchar(key)
+    for (i in 1:key.len){
+        k_i <- substring(key, i, i)
+        if( !(k_i %in% colnames(trie)) ){
+            return(states)
+        }
+        next_s <- as.numeric(subset(trie, trie$pid==state)[k_i])
+        if (next_s == -1){
+            break
+        }else{
+            state=as.numeric(next_s)
+            states=c(states, state)
+        }
+    }
+    return(states)
+}
+```
+
+## 実装(トライ木の探索) {.smaller}
+
+* trieは辞書のテーブル
+* 全て得なくてはならない
+
+```{r}
+# たべた
+key="たべものが体質にあった"
+search4pids(key, trie)
+```
+
+## Trie木のテーブル {.smaller}
+
+文字列を自動的に要因として扱う。unlistすると要因だから数値に変換される。
+
+```{r}
+pid2lex <- read.table("pid2lex.tsv",sep='\t', header=TRUE,
+                      stringsAsFactors=FALSE)
+datatable(pid2lex,options = list(pageLength=9))
+
+# lexを返す関数を
+# まず.dfをとって
+# さらにに.pidをとって返す
+lex.by.pid <- function(.df) function(.pid) {
+    if ( !(.pid %in% .df$pid)){
+        return("")
+    }else{
+        .df %>% filter(pid==.pid) %>% 
+        # selectではない
+        pull(lex) %>% 
+        return() 
+    }
+}
+#flatten %>%as.character() %>% 
+
+key="たべものが体質にあった"
+search4pids(key, trie) %>% map(., lex.by.pid(pid2lex)) %>% unlist
+```
+
+## 辞書の参照
+
+```{r}
+dictionary <- read.table("dictionary.tsv",sep='\t', header=TRUE,
+                      stringsAsFactors=FALSE)
+datatable(dictionary,options = list(pageLength=9))
+
+dict.by.lex <- function(.df) function(.lex) {
+    .df %>% filter(`見出し`==.lex) %>% return() 
+}
+
+search4pids(key, trie) %>% 
+    # 0を除去する無名関数
+    (function(l) return(l[l!=0])) %>%
+    map(., lex.by.pid(pid2lex)) %>%
+    # 空の入力を除去する無名関数""
+    (function(l) return(l[l!=""])) %>%
+    map(.,dict.by.lex(dictionary))
+```
+
+## ちょっと関数化しておく
+
+```{r}
+common_prefix_serch <- 
+    function(.key, .trie, .pid2lex, .dictionary) {
+        search4pids(.key, .trie) %>% 
+        (function(l) return(l[l!=0])) %>%
+        map(., lex.by.pid(.pid2lex)) %>%
+        (function(l) return(l[l!=""])) %>%
+        map(., dict.by.lex(.dictionary))}
+common_prefix_serch(key, trie, pid2lex, dictionary)
+
+```
+
+## 先頭から辞書引き
+
+```{r}
+# 頭からの辞書引き
+lookup <- function(.str){
+    key.len <- nchar(key)
+    for (i in 1:key.len){
+        k_i <- substring(key, i, key.len)
+        words <- common_prefix_serch(k_i, trie, pid2lex, dictionary)
+        print(i)
+        for (word in words){
+            print(word)
+        }
+    }
+}
+lookup(key)
+```
+
+## グラフ構築
+
+* googleの方法
+* 無名はスロットは使わない
+
+スロット: representation
+スロットのデフォルト: prototype関数
+与え方: new関数でインスタンスを作る
+取り出し方: `@`でメンバ変数にアクセスできる。
+
+始まり位置、文字列、コストを持つ
+
+前があるとも後ろがあるとも限らないので、
+とりあえず単ノードを作る。
+prevもafterもいらない。idで見れば分かるのだから。
+
+```{r}
+# デフォルトでprevにBOSを持つ
+setClass(
+    "Node",
+    representation(
+        start_pos = "numeric",
+        end_pos = "numeric",
+        lex = "data.frame",
+        pos = "character",
+        score = "numeric"
+    ),
+    prototype(
+        score=0
+    )
+)
+```
+
+```{r}
+# BOSを単語登録する
+key.len <- nchar(key)
+graph <- list(c(new("Node",start_pos=0,end_pos=1, lex="BOS" ,score=0)))
+graph[[key.len+2]] <- list(
+    new("Node",start_pos=key.len+2,end_pos=key.len+3,lex="EOS",score=0)
+)
+graph
+
+# graph[[key.len]] = c(graph[[key.len]],graph[[key.len]])
+
+for (i in 1:key.len){
+    k_i <- substring(key, i, key.len)
+    words <- common_prefix_serch(k_i, trie, pid2lex, dictionary)
+    for (word in words){
+        for (i in 1:nrow(word)){
+            print(word[i,])
+            word.i <- word[i,]
+            start=i+1
+            end = i+1+nchar(word.i$見出し)
+            entry = word.i$見出し
+            node <-
+                new("Node", start_pos=start, end_pos=end, lex=word.i)
+            graph[[start]] <- c(graph[[start]],node) 
+        }
+    }
+}
+
+graph
+key
+lookup(key)
+```
