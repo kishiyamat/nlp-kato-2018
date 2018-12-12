@@ -10,20 +10,20 @@
 
 ## 文法
 
-CYK法のような"上昇型文法解析"を実行するためには
+CYK法のような上昇型文法解析を実行するためには
 1. 左辺と右辺から成る文法
 と、
 2. 右辺から左辺を取得する関数
 の2つがまず必要となる。
-この節でははじめに、与えられた文法を
+まず、この節では与えられた文法を
 1. 句構造規則`rule.p`と
 2. 辞書規則`rule.d`に分け、
 Char型で定義する。
 文脈自由文法のなかでも、
 句構造規則は非終端記号を左辺に持ち、
 右辺には2つの非終端記号からのみなる
-「チョムスキー標準形」を用いる。
-また辞書規則は前終端記号(品詞)から
+チョムスキー標準形を用いる。
+なお、辞書規則は前終端記号(品詞)から
 終端記号への遷移を示す。
 
 ```r
@@ -38,12 +38,11 @@ rule.d <- c("NP -> 薬",     "NP -> 病院",     "NP -> ヒロシ",
 
 次に、上の各規則に含まれる ` -> `で左辺と右辺を分割し
 Char型のvectorを生成する関数 `char2cfg` も定義する。
-仮に "S -> PP VP"という文字列を`char2cfg`に与えた場合、
+この`char2cfg`関数に "S -> PP VP" という文字列を与えた場合、
 左辺の"S"が第一要素に、右辺の"PP VP"が第二要素に返される。
 
 ```r
 char2cfg <- function(s) unlist(strsplit(s, " -> "))
-char2cfg("S -> PP VP")
 # [1] "S"     "PP VP"
 ```
 
@@ -66,16 +65,18 @@ sapply(rule.p, char2cfg)
 # [2,] "PP VP"    "NP P"     "VP NP"     "PP VP"    
 ```
 
+## 統合操作
+
 CYK解析は上昇型の解析であるため、
-'PP'と'VP'を見たら'S'を返し、
-'太郎' を見たら 'NP' を返してくれる、
-右辺から左辺を求める機能が必要となる。
+'太郎' を見たら 'NP' を返し、
+'PP'と'VP'を見れば統合し'S'を返してくれる、
+右辺を統合し左辺を求める機能が必要となる。
 先ほどの`char2cfg`を規則に`sapply`すると、
 各リストの要素にはLHSとRHSが格納された。
-このリストを`vector.p`に格納し、
-`t`関数で転置し `as.data.frame` で`data.frame`に変換し、
-列に`LHS`と`RHS`の名前をつける。
-これらの作業を句構造規則`rule.p`対して行なうと
+このリストを`vector.p`に格納し、行に`LHS`と`RHS`の名前をつける。
+そして`t`関数で転置し `as.data.frame` で`data.frame`に変換する。
+この「規則のベクトルから規則のテーブルへの変換(`vector2table`)」を
+句構造規則`rule.p`対して行なうと
 `table.p` という `data.frame` が作れる。
 
 ```r
@@ -89,30 +90,24 @@ t(vector.p)
 # PP -> NP P  "PP" "NP P" 
 # NP -> VP NP "NP" "VP NP"
 # VP -> PP VP "VP" "PP VP"
-# 上の作業+列名変更すると目的達成
 vector2table <- function(l) {
-    table <- as.data.frame(t(l), stringsAsFactors=FALSE)
-    colnames(table) <-  c("LHS","RHS")
-    return(table)}
+    dimnames(l) <- list(c("LHS","RHS"), NULL)
+    as.data.frame(t(l), stringsAsFactors=FALSE) }
 table.p <- vector2table(vector.p)
 table.p
-#             LHS   RHS
-# S -> PP VP    S PP VP
-# PP -> NP P   PP  NP P
-# NP -> VP NP  NP VP NP
-# VP -> PP VP  VP PP VP
+#   LHS   RHS
+# 1   S PP VP
+# 2  PP  NP P
+# 3  NP VP NP
+# 4  VP PP VP
 ```
 
-上の様なテーブルがあれば、RHSからLHSの取得は容易となる。
-例えば、仮に"PP VP"を`RHS`にもつ規則が欲しければ、
-`RHS`列が"PP VP"のデータフレームを`subset`として取り、
-そのデータフレームの`LHS`行をベクトルとして取得すれば良い。
+上の様なテーブルがあれば、
+`RHS`を参照、統合し`LHS`を取得することが容易となる。
+例えば、仮に"PP VP"を統合する規則が欲しい場合を考える。
+その際は「`RHS`列が"PP VP"であるデータフレーム」
+を`subset`として取り、そのデータフレームの`LHS`行を取得すれば良い。
 そのような関数を以下に`rhs2lhs`と定義する。
-まず参照するテーブルを`table`として引数にとり以下の関数を返す。
-`RHS`をChar型として引数に取り、
-先に部分適用した`table`の`LHS`を取得できる。
-仮に`table.p`を与えてから"PP VP"を与えた場合、
-"S"と"VP"の2つがベクトルとして返される。
 
 ```r
 subset(table.p, table.p$RHS=="PP VP")
@@ -120,7 +115,27 @@ subset(table.p, table.p$RHS=="PP VP")
 # S -> PP VP    S PP VP
 # VP -> PP VP  VP PP VP
 rhs2lhs <- function(table) function(rhs){
-    unlist(subset(table, table$RHS==rhs)$LHS)}
+    subset(table, table$RHS==rhs)$LHS}
+```
+
+この関数は引数をとって関数を返す、
+いわゆる高階関数である。
+この関数はまず統合の可否を決めるために参照するテーブルを
+`table`として引数に取り、以下の性質を持つ関数を返す。
+
+> `RHS`をChar型として引数に取り、
+> 先に部分適用している`table`の`LHS`を返す。
+
+仮に`table.p`を与えてから"PP VP"を与えた場合、
+"S"と"VP"の2つがベクトルとして返される。
+
+```r
+table.p
+#   LHS   RHS
+# 1   S PP VP <- これと
+# 2  PP  NP P
+# 3  NP VP NP
+# 4  VP PP VP <- これがsubsetとなる
 rhs2lhs(table.p)("PP VP")
 # [1] "S"  "VP"
 ```
