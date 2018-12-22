@@ -465,8 +465,8 @@ for(d in 1:(n-1)){
 }
 # 最後の出力は配列の奥行きの要素を文字列として結合するのみである。
 cat.table <- array(dim = c(n, n))
-for(i in 1:8){
-    for(j in 1:8){
+for(i in 1:n){
+    for(j in 1:n){
     cat.table[i,j]<- toString(na.omit(triangle[i,j,]))
     }
 }
