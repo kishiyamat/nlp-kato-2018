@@ -1,0 +1,50 @@
+This is pBibTeX, Version 0.99d-j0.33 (utf8.euc) (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: abstract.aux
+The style file: theapa.bst
+Database file #1: ./ref.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--there's a number but no volume in kato1985
+You've used 3 entries,
+            2802 wiz_defined-function locations,
+            629 strings with 5537 characters,
+and the built_in function-call counts, 1341 in all, are:
+= -- 123
+> -- 50
+< -- 5
++ -- 15
+- -- 15
+* -- 107
+:= -- 214
+add.period$ -- 8
+call.type$ -- 3
+change.case$ -- 12
+chr.to.int$ -- 3
+cite$ -- 4
+duplicate$ -- 65
+empty$ -- 112
+format.name$ -- 18
+if$ -- 285
+int.to.chr$ -- 0
+int.to.str$ -- 0
+missing$ -- 3
+newline$ -- 18
+num.names$ -- 14
+pop$ -- 21
+preamble$ -- 1
+purify$ -- 18
+quote$ -- 0
+skip$ -- 48
+stack$ -- 0
+substring$ -- 71
+swap$ -- 24
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 24
+warning$ -- 1
+while$ -- 15
+width$ -- 0
+write$ -- 42
+is.kanji.str$ -- 0
+(There was 1 warning)

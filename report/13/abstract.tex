@@ -1,0 +1,38 @@
+% http://blog.livedoor.jp/tmako123-programming/archives/34963127.html?1512833674#comment-form
+\documentclass[dvipdfmx,11pt]{jarticle}
+
+\usepackage[top=1truein,bottom=1truein,left=0.8truein,right=0.8truein]{geometry}
+% \usepackage[scale=1]{tgtermes}
+\usepackage{lingmacros,theapa}
+% \usepackage[dvipdfmx]{graphicx}
+\citepunct{(}{\&}{and}{ }{; }{: }{)}{}{.}
+\usepackage{graphicx}
+\usepackage{tipa}
+\usepackage[linguistics]{forest}
+\useforestlibrary{linguistics}
+\forestapplylibrarydefaults{linguistics}
+
+% グロスマクロ
+\newcommand{\gl}[2]{%
+\leavevmode\vtop{\hbox{#1}%
+\hbox{#2\lower1.4ex\rlap{}}}}
+
+\pagestyle{empty}
+
+% \renewcommand{\baselinestretch}{0.93}
+
+\title{英語学習者の調音ミスをテキストから検出するシステム}
+\author{岸山 健}
+\date{\today}
+
+\begin{document}
+\maketitle % 表題の出力
+
+% \normalsize
+\input{report.tex}
+
+\bibliographystyle{theapa}
+% \bibliographystyle{jplain}
+\bibliography{./ref}
+
+\end{document}
